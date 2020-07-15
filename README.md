@@ -2,7 +2,7 @@
 
 总结iOS常见面试题，以及BAT大厂面试分享！笔者一道一道总结，如果你觉得还不错，小心心 **Star** 走一波.... Thanks♪(･ω･)ﾉ
 
-##### 1：谈谈你对KVC的理解
+#### 1：谈谈你对KVC的理解
 
 `KVC`可以通过`key`直接访问对象的属性，或者给对象的属性赋值，这样可以在运行时动态的访问或修改对象的属性
 
@@ -31,7 +31,7 @@
 
 * 4、如果还没有找到，再检查类方法 `+ (BOOL)accessInstanceVariablesDirectly`,如果返回 `YES` (默认行为)，那么和先前的设值一样，会按 `_<key>,_is<Key>,<key>,is<Key>` 的顺序搜索成员变量名，这里不推荐这么做，因为这样直接访问实例变量破坏了封装性，使代码更脆弱。如果重写了类方法 `+ (BOOL)accessInstanceVariablesDirectly` 返回 `NO` 的话，那么会直接调用 `valueForUndefinedKey:` 方法，默认是抛出异常
 
-##### 2：iOS项目中引用多个第三方库引发冲突的解决方法
+#### 2：iOS项目中引用多个第三方库引发冲突的解决方法
 
 > 可能有很多小伙伴还不太清楚，动静态库的开发，这里推荐一篇博客：[iOS-制作.a静态库SDK和使用.a静态库](https://blog.csdn.net/Feng512275/article/details/77864609)
 
@@ -58,7 +58,7 @@
 * 将修改好的文件， 拖拽到原文件夹下，替换原文件即可。
 
 
-##### 3：GCD实现多读单写
+#### 3：GCD实现多读单写
 
 比如在内存中维护一份数据，有多处地方可能会同时操作这块数据，怎么能保证数据安全？这道题目总结得到要满足以下三点：
 
@@ -113,7 +113,7 @@
    
     * 为什么不用同步函数？如果读写都操作了，那么用同步函数，就有可能存在：我写需要等待读操作回来才能执行，显然这里是不合理！
 
-##### 4:讲一下atomic的实现机制；为什么不能保证绝对的线程安全（最好可以结合场景来说）？
+#### 4:讲一下atomic的实现机制；为什么不能保证绝对的线程安全（最好可以结合场景来说）？
 
 **A: atomic的实现机制**
 * `atomic`是`property`的修饰词之一，表示是原子性的，使用方式为`@property(atomic)int age`;此时编译器会自动生成 `getter/setter` 方法，最终会调用`objc_getProperty`和`objc_setProperty`方法来进行存取属性。
@@ -130,7 +130,7 @@
 
 
 
-##### 5. Autoreleasepool所使用的数据结构是什么？AutoreleasePoolPage结构体了解么？
+#### 5. Autoreleasepool所使用的数据结构是什么？AutoreleasePoolPage结构体了解么？
 
 * `Autoreleasepool`是由多个`AutoreleasePoolPage`以双向链表的形式连接起来的.
 
@@ -152,7 +152,7 @@ class AutoreleasePoolPage {
 ```
 
 
-##### 6: iOS中内省的几个方法？class方法和objc_getClass方法有什么区别?
+#### 6: iOS中内省的几个方法？class方法和objc_getClass方法有什么区别?
 
 * 1: 什么是内省？
 
