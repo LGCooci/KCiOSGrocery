@@ -2,6 +2,10 @@
 
 总结iOS常见面试题，以及BAT大厂面试分享！笔者一道一道总结，如果你觉得还不错，小心心 **Star** 走一波.... Thanks♪(･ω･)ﾉ
 
+**⚠️特别说明：部分来源网络摘抄，如有疑问，立即删除！⚠️**
+
+> 本人博客地址：[Cooci-掘金](https://juejin.im/user/5c3f3c415188252b7d0ea40c)
+
 #### 1：谈谈你对KVC的理解
 
 `KVC`可以通过`key`直接访问对象的属性，或者给对象的属性赋值，这样可以在运行时动态的访问或修改对象的属性
@@ -582,4 +586,345 @@ objc_object::ISA()
 * 第二行`isa` 指向 `NSObject` 的 `Meta Class`，所以和 `NSObject Class`不相等。第四行，`isa`指向`Sark`的`Meta Class`，和`Sark Class`也不等，所以第二行`res2`和第四行`res4`都输出NO。
 
 
-#### 19.
+#### 19.Class与内存地址
+
+**下面的代码会？`Compile Error / Runtime Crash / NSLog…?`**
+
+```
+@interface Sark : NSObject
+@property (nonatomic, copy) NSString *name;
+- (void)speak;
+@end
+@implementation Sark
+- (void)speak {
+    NSLog(@"my name's %@", self.name);
+}
+@end
+@implementation ViewController
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    id cls = [Sark class];
+    void *obj = &cls;
+    [(__bridge id)obj speak];
+}
+@end
+```
+
+这道题有两个难点。
+* 难点一:`obj`调用`speak`方法，到底会不会崩溃。
+* 难点二:如果`speak`方法不崩溃，应该输出什么？
+
+**首先需要谈谈隐藏参数self和_cmd的问题。**
+当`[receiver message]`调用方法时，系统会在运行时偷偷地动态传入两个隐藏参数`self`和`_cmd`，之所以称它们为隐藏参数，是因为在源代码中没有声明和定义这两个参数。`self`在已经明白了，接下来就来说说`_cmd`。`_cmd`表示当前调用方法，其实它就是一个方法选择器`SEL`。
+
+* 难点一，能不能调用`speak`方法？
+```
+id cls = [Sark class]; 
+void *obj = &cls;
+```
+
+答案是可以的。`obj`被转换成了一个指向`Sark Class`的指针，然后使用`id`转换成了`objc_object`类型。`obj`现在已经是一个`Sark`类型的实例对象了。当然接下来可以调用speak的方法。
+
+* 难点二，如果能调用`speak`，会输出什么呢？
+
+**很多人可能会认为会输出sark相关的信息。这样答案就错误了。**
+
+正确的答案会输出
+
+`my name is <ViewController: 0x7ff6d9f31c50>`
+
+> 内存地址每次运行都不同，但是前面一定是`ViewController。why？`
+
+我们把代码改变一下，打印更多的信息出来。
+```
+- (void)viewDidLoad {
+    [super viewDidLoad];
+ 
+    NSLog(@"ViewController = %@ , 地址 = %p", self, &self);
+ 
+    id cls = [Sark class];
+    NSLog(@"Sark class = %@ 地址 = %p", cls, &cls);
+ 
+    void *obj = &cls;
+    NSLog(@"Void *obj = %@ 地址 = %p", obj,&obj);
+ 
+    [(__bridge id)obj speak];
+ 
+    Sark *sark = [[Sark alloc]init];
+    NSLog(@"Sark instance = %@ 地址 = %p",sark,&sark);
+ 
+    [sark speak];
+ 
+}
+```
+我们把对象的指针地址都打印出来。输出结果：
+
+```
+ViewController = <ViewController: 0x7fb570e2ad00> , 地址 = 0x7fff543f5aa8
+Sark class = Sark 地址 = 0x7fff543f5a88
+Void *obj = <Sark: 0x7fff543f5a88> 地址 = 0x7fff543f5a80
+ 
+my name is <ViewController: 0x7fb570e2ad00>
+ 
+Sark instance = <Sark: 0x7fb570d20b10> 地址 = 0x7fff543f5a78
+my name is (null)
+```
+
+**objc_msgSendSuper2 解读**
+
+```
+// objc_msgSendSuper2() takes the current search class, not its superclass.
+OBJC_EXPORT id objc_msgSendSuper2(struct objc_super *super, SEL op, ...)
+    __OSX_AVAILABLE_STARTING(__MAC_10_6, __IPHONE_2_0);
+```
+
+objc_msgSendSuper2方法入参是一个objc_super *super。
+
+```
+/// Specifies the superclass of an instance. 
+struct objc_super {
+    /// Specifies an instance of a class.
+    __unsafe_unretained id receiver;
+ 
+    /// Specifies the particular superclass of the instance to message. 
+#if !defined(__cplusplus)  &&  !__OBJC2__
+    /* For compatibility with old objc-runtime.h header */
+    __unsafe_unretained Class class;
+#else
+    __unsafe_unretained Class super_class;
+#endif
+    /* super_class is the first class to search */
+};
+#endif
+
+```
+所以按viewDidLoad执行时各个变量入栈顺序从高到底为`self`, `_cmd`, `self.class`, `self`, `obj`。
+
+* 第一个`self`和第二个`_cmd`是隐藏参数。
+
+* 第三个`self.class`和第四个`self`是`[super viewDidLoad]`方法执行时候的参数。
+
+* 在调用`self.name`的时候，本质上是`self`指针在内存向高位地址偏移一个指针。在32位下面，一`个指针是4字节=4*8bit=32bit`。**（64位不一样但是思路是一样的）**
+* 从打印结果我们可以看到，`obj`就是`cls`的地址。在`obj`向上偏移`32bit`就到了`0x7fff543f5aa8`，这正好是`ViewController`的地址。
+
+**所以输出为my name is `<ViewController: 0x7fb570e2ad00>`。**
+
+至此，`Objc`中的对象到底是什么呢？
+
+> 实质：`Objc`中的对象是一个指向`ClassObject`地址的变量，即 `id obj = &ClassObject` ， 而对象的实例变量 `void *ivar = &obj + offset(N)`
+
+加深一下对上面这句话的理解，下面这段代码会输出什么？
+```
+- (void)viewDidLoad {
+    [super viewDidLoad];
+ 
+    NSLog(@"ViewController = %@ , 地址 = %p", self, &self);
+ 
+    NSString *myName = @"halfrost";
+ 
+    id cls = [Sark class];
+    NSLog(@"Sark class = %@ 地址 = %p", cls, &cls);
+ 
+    void *obj = &cls;
+    NSLog(@"Void *obj = %@ 地址 = %p", obj,&obj);
+ 
+    [(__bridge id)obj speak];
+ 
+    Sark *sark = [[Sark alloc]init];
+    NSLog(@"Sark instance = %@ 地址 = %p",sark,&sark);
+ 
+    [sark speak];
+ 
+}
+ViewController = <ViewController: 0x7fff44404ab0> ,  地址  = 0x7fff56a48a78
+Sark class = Sark  地址  = 0x7fff56a48a50
+Void *obj = <Sark: 0x7fff56a48a50>  地址 = 0x7fff56a48a48
+ 
+my name is halfrost
+ 
+Sark instance = <Sark: 0x6080000233e0>  地址 = 0x7fff56a48a40
+my name is (null)
+```
+
+由于加了一个字符串，结果输出就完全变了，`[(__bridge id)obj speak]`;这句话会输出`“my name is halfrost”`
+
+> 原因还是和上面的类似。按`viewDidLoad`执行时各个变量入栈顺序从高到底为`self`，`_cmd`，`self.class`，`self`，`myName`，`obj`。`obj`往上偏移32位，就是`myName`字符串，所以输出变成了输出`myName`了。
+
+
+#### 20. 排序题：冒泡排序，选择排序，插入排序，快速排序（二路，三路）能写出那些？
+
+这里简单的说下几种快速排序的不同之处，随机快排，是为了解决在近似有序的情况下，时间复杂度会退化为`O(n^2)`,双路快排是为了解决快速排序在大量数据重复的情况下，时间复杂度会退化为`O(n^2)`，三路快排是在大量数据重复的情况下，对双路快排的一种优化。
+
+* 冒泡排序
+
+```
+extension Array where Element : Comparable{
+    public mutating func bubbleSort() {
+        let count = self.count
+        for i in 0..<count {
+            for j in 0..<(count - 1 - i) {
+                if self[j] > self[j + 1] {
+                    (self[j], self[j + 1]) = (self[j + 1], self[j])
+                }
+            }
+        }
+    }
+}
+```
+
+* 选择排序
+
+```
+extension Array where Element : Comparable{
+    public mutating func selectionSort() {
+        let count = self.count
+        for i in 0..<count {
+            var minIndex = i
+            for j in (i+1)..<count {
+                if self[j] < self[minIndex] {
+                    minIndex = j
+                }
+            }
+            (self[i], self[minIndex]) = (self[minIndex], self[i])
+        }
+    }
+}
+```
+
+* 插入排序
+
+```
+extension Array where Element : Comparable{
+    public mutating func insertionSort() {
+        let count = self.count
+        guard count > 1 else { return }
+        for i in 1..<count {
+            var preIndex = i - 1
+            let currentValue = self[i]
+            while preIndex >= 0 && currentValue < self[preIndex] {
+                self[preIndex + 1] = self[preIndex]
+                preIndex -= 1
+            }
+            self[preIndex + 1] = currentValue
+        }
+    }
+}
+```
+
+* 快速排序
+
+```
+extension Array where Element : Comparable{
+    public mutating func quickSort() {
+        func quickSort(left:Int, right:Int) {
+            guard left < right else { return }
+            var i = left + 1,j = left
+            let key = self[left]
+            while i <= right {
+                if self[i] < key {
+                    j += 1
+                    (self[i], self[j]) = (self[j], self[i])
+                }
+                i += 1
+            }
+            (self[left], self[j]) = (self[j], self[left])
+            quickSort(left: j + 1, right: right)
+            quickSort(left: left, right: j - 1)
+        }
+        quickSort(left: 0, right: self.count - 1)
+    }
+}
+```
+* 随机快排
+
+```
+extension Array where Element : Comparable{
+    public mutating func quickSort1() {
+        func quickSort(left:Int, right:Int) {
+            guard left < right else { return }
+            let randomIndex = Int.random(in: left...right)
+            (self[left], self[randomIndex]) = (self[randomIndex], self[left])
+            var i = left + 1,j = left
+            let key = self[left]
+            while i <= right {
+                if self[i] < key {
+                    j += 1
+                    (self[i], self[j]) = (self[j], self[i])
+                }
+                i += 1
+            }
+            (self[left], self[j]) = (self[j], self[left])
+            quickSort(left: j + 1, right: right)
+            quickSort(left: left, right: j - 1)
+        }
+        quickSort(left: 0, right: self.count - 1)
+    }
+}
+```
+
+* 双路快排
+
+```
+extension Array where Element : Comparable{
+    public mutating func quickSort2() {
+        func quickSort(left:Int, right:Int) {
+            guard left < right else { return }
+            let randomIndex = Int.random(in: left...right)
+            (self[left], self[randomIndex]) = (self[randomIndex], self[left])
+            var l = left + 1, r = right
+            let key = self[left]
+            while true {
+                while l <= r && self[l] < key {
+                    l += 1
+                }
+                while l < r && key < self[r]{
+                    r -= 1
+                }
+                if l > r { break }
+                (self[l], self[r]) = (self[r], self[l])
+                l += 1
+                r -= 1
+            }
+            (self[r], self[left]) = (self[left], self[r])
+            quickSort(left: r + 1, right: right)
+            quickSort(left: left, right: r - 1)
+        }
+        quickSort(left: 0, right: self.count - 1)
+    }
+}
+```
+
+* 三路快排
+
+```
+// 三路快排
+extension Array where Element : Comparable{
+    public mutating func quickSort3() {
+        func quickSort(left:Int, right:Int) {
+            guard left < right else { return }
+            let randomIndex = Int.random(in: left...right)
+            (self[left], self[randomIndex]) = (self[randomIndex], self[left])
+            var lt = left, gt = right
+            var i = left + 1
+            let key = self[left]
+            while i <= gt {
+                if self[i] == key {
+                    i += 1
+                }else if self[i] < key{
+                    (self[i], self[lt + 1]) = (self[lt + 1], self[i])
+                    lt += 1
+                    i += 1
+                }else {
+                    (self[i], self[gt]) = (self[gt], self[i])
+                    gt -= 1
+                }
+                
+            }
+            (self[left], self[lt]) = (self[lt], self[left])
+            quickSort(left: gt + 1, right: right)
+            quickSort(left: left, right: lt - 1)
+        }
+        quickSort(left: 0, right: self.count - 1)
+    }
+}
+```
