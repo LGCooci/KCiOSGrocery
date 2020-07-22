@@ -151,7 +151,6 @@ class AutoreleasePoolPage {
 }
 ```
 
-
 #### 6: iOS中内省的几个方法？class方法和objc_getClass方法有什么区别?
 
 * 1: 什么是内省？
@@ -173,3 +172,414 @@ class AutoreleasePoolPage {
     * 实例`class`方法就直接返回`object_getClass(self)`
    
     * 类`class`方法直接返回`self`，而`object_getClass`(类对象)，则返回的是元类
+
+
+#### 7: 分类和扩展有什么区别？可以分别用来做什么？分类有哪些局限性？分类的结构体里面有哪些成员？
+
+* 1:分类主要用来为某个类添加方法，属性，协议（我一般用来为系统的类扩展方法或者把某个复杂的类的按照功能拆到不同的文件里）
+
+* 2:扩展主要用来为某个类原来没有的成员变量、属性、方法。注：方法只是声明（我一般用扩展来声明私有属性，或者把.h的只读属性重写成可读写的）
+
+**分类和扩展的区别：**
+
+* 分类是在运行时把分类信息合并到类信息中，而扩展是在编译时，就把信息合并到类中的
+
+* 分类声明的属性，只会生成`getter/setter`方法的声明，不会自动生成成员变量和`getter/setter`方法的实现，而扩展会
+
+* 分类不可用为类添加实例变量，而扩展可以
+
+* 分类可以为类添加方法的实现，而扩展只能声明方法，而不能实现
+
+**分类的局限性：**
+
+* 无法为类添加实例变量，但可通过关联对象进行实现，注：关联对象中内存管理没有weak，用时需要注意野指针的问题，可通过其他办法来实现，具体可参考[iOS weak 关键字漫谈](http://mrpeak.cn/blog/ios-weak/)
+
+* 分类的方法若和类中原本的实现重名，会覆盖原本方法的实现，注：并不是真正的覆盖
+
+* 多个分类的方法重名，会调用最后编译的那个分类的实现
+
+**分类的结构体里有哪些成员**
+
+```
+struct category_t {
+    const char *name; //名字
+    classref_t cls; //类的引用
+    struct method_list_t *instanceMethods;//实例方法列表
+    struct method_list_t *classMethods;//类方法列表
+    struct protocol_list_t *protocols;//协议列表
+    struct property_list_t *instanceProperties;//实例属性列表
+    // 此属性不一定真正的存在
+    struct property_list_t *_classProperties;//类属性列表
+};
+```
+
+#### 8：能不能简述一下 Dealloc 的实现机制
+
+Dealloc 的实现机制是内容管理部分的重点，把这个知识点弄明白，对于全方位的理解内存管理的只是很有 必要。
+
+**1.Dealloc 调用流程 **
+
+* 1.首先调用 `_objc_rootDealloc() `
+
+* 2.接下来调用 `rootDealloc() `
+
+* 3.这时候会判断是否可以被释放，判断的依据主要有 5 个，判断是否有以上五种情况 
+    
+    * `NONPointer_ISA` 
+    * `weakly_reference` 
+    * `has_assoc` 
+    * `has_cxx_dtor` 
+    * `has_sidetable_rc`
+
+* 4-1.如果有以上五中任意一种，将会调用 `object_dispose()`方法，做下一步的处理。 
+* 4-2.如果没有之前五种情况的任意一种，则可以执行释放操作，`C 函数的 free()`。 
+* 5.执行完毕。
+
+**2.object_dispose() 调用流程**。 
+
+* 1.直接调用 `objc_destructInstance()`。 
+
+* 2.之后调用 C 函数的 free()。 
+
+**3.`objc_destructInstance()` 调用流程** 
+   
+* 1.先判断 `hasCxxDtor`，如果有 C++ 的相关内容，要调用 `object_cxxDestruct() `，销毁 C++ 相关的内容。 
+    
+* 2.再判断 `hasAssocitatedObjects`，如果有的话，要调用 `object_remove_associations()`， 销毁关联对象的一系列操作。 
+
+* 3.然后调用 `clearDeallocating()`。  
+    
+* 4.执行完毕。 
+
+**4.`clearDeallocating()` 调用流程**。 
+     
+* 1.先执行 `sideTable_clearDellocating()`。  
+* 2.再执行 `weak_clear_no_lock`,在这一步骤中，会将指向该对象的弱引用指针置为 `nil`。 
+* 3.接下来执行 `table.refcnts.eraser()`，从引用计数表中擦除该对象的引用计数。  
+* 4.至此为止，`Dealloc` 的执行流程结束。
+
+
+#### 9：HTTPS和HTTP的区别
+
+**HTTPS协议 = HTTP协议 + SSL/TLS协议**
+
+* `SSL`的全称是`Secure Sockets Layer`，即安全套接层协议，是为网络通信提供安全及数据完整性的一种安全协议。
+* TLS的全称是`Transport Layer Security`，即安全传输层协议。
+
+**即HTTPS是安全的HTTP。**
+
+
+`https`, 全称`Hyper Text Transfer Protocol Secure`，相比`http`，多了一个`secure`，这一个`secure`是怎么来的呢？这是由`TLS（SSL）`提供的！大概就是一个叫`openSSL`的`library`提供的。`https`和`http`都属于`application layer`，基于TCP（以及UDP）协议，但是又完全不一样。TCP用的port是80， https用的是443（值得一提的是，google发明了一个新的协议，叫QUIC，并不基于TCP，用的port也是443， 同样是用来给https的。谷歌好牛逼啊。）总体来说，https和http类似，但是比http安全。
+
+
+#### 10：TCP为什么要三次握手，四次挥手？
+
+**三次握手：**
+
+* 客户端向服务端发起请求链接，首先发送`SYN`报文，`SYN=1，seq=x`,并且客户端进入`SYN_SENT`状态
+
+* 服务端收到请求链接，服务端向客户端进行回复，并发送响应报文，`SYN=1，seq=y,ACK=1,ack=x+1`,并且服务端进入到`SYN_RCVD`状态
+
+* 客户端收到确认报文后，向服务端发送确认报文，`ACK=1，ack=y+1`，此时客户端进入到`ESTABLISHED`，服务端收到用户端发送过来的确认报文后，也进入到`ESTABLISHED`状态，此时链接创建成功
+
+**四次挥手：**
+
+* 客户端向服务端发起关闭链接，并停止发送数据
+
+* 服务端收到关闭链接的请求时，向客户端发送回应，我知道了，然后停止接收数据
+
+* 当服务端发送数据结束之后，向客户端发起关闭链接，并停止发送数据
+
+* 客户端收到关闭链接的请求时，向服务端发送回应，我知道了，然后停止接收数据
+
+**为什么需要三次握手：**
+
+为了防止已失效的连接请求报文段突然又传送到了服务端，因而产生错误，假设这是一个早已失效的报文段。但`server`收到此失效的连接请求报文段后，就误认为是`client`再次发出的一个新的连接请求。于是就向`client`发出确认报文段，同意建立连接。假设不采用“三次握手”，那么只要server发出确认，新的连接就建立了。由于现在`client`并没有发出建立连接的请求，因此不会理睬`server`的确认，也不会向`server`发送数据。但`server`却以为新的运输连接已经建立，并一直等待`client`发来数据。这样，`server`的很多资源就白白浪费掉了。
+
+**为什么需要四次挥手：**
+
+因为TCP是全双工通信的，在接收到客户端的关闭请求时，还可能在向客户端发送着数据，因此不能再回应关闭链接的请求时，同时发送关闭链接的请求
+
+
+#### 11. 对称加密和非对称加密的区别？分别有哪些算法的实现？
+
+**对称加密，加密的加密和解密使用同一密钥。**
+
+* 非对称加密，使用一对密钥用于加密和解密，分别为公开密钥和私有密钥。公开密钥所有人都可以获得，通信发送方获得接收方的公开密钥之后，就可以使用公开密钥进行加密，接收方收到通信内容后使用私有密钥解密。
+
+* 对称加密常用的算法实现有AES,ChaCha20,DES,不过DES被认为是不安全的;非对称加密用的算法实现有RSA，ECC
+
+#### 12. HTTPS的握手流程？为什么密钥的传递需要使用非对称加密？双向认证了解么？
+HTTPS的握手流程，如下图，摘自图解HTTP
+
+![](https://user-gold-cdn.xitu.io/2019/12/26/16f41a3d3747ff31?imageView2/0/w/1280/h/960/ignore-error/1)
+
+* 1：客户端发送Client Hello 报文开始SSL通信。报文中包含客户端支持的SSL的版本，加密组件列表。
+
+* 2：服务器收到之后，会以Server Hello 报文作为应答。和客户端一样，报文中包含客户端支持的SSL的版本，加密组件列表。服务器的加密组件内容是从接收到的客户端加密组件内筛选出来的
+
+* 3：服务器发送Certificate报文。报文中包含公开密钥证书。
+
+* 4：然后服务器发送Server Hello Done报文通知客户端，最初阶段的SSL握手协商部分结束
+
+* 5：SSL第一次握手结束之后，客户端以Client Key Exchange报文作为会议。报文中包含通信加密中使用的一种被称为Pre-master secret的随机密码串
+
+* 6：接着客户端发送Change Cipher Space报文。该报文会提示服务器，在次报文之后的通信会采用Pre-master secret密钥加密
+
+* 7：客户端发送Finished 报文。该报文包含链接至今全部报文的整体校验值。这次握手协商是否能够成功，要以服务器是否能够正确揭秘该报文作为判定标准
+
+* 8：服务器同样发送Change Cipher Space报文。
+
+* 9：服务器同样发送Finished报文。
+
+* 10：服务器和客户端的Finished报文交换完毕之后，SSL连接建立完成，从此开始HTTP通信，通信的内容都使用Pre-master secret加密。然后开始发送HTTP请求
+
+* 11：应用层收到HTTP请求之后，发送HTTP响应
+
+* 12：最后有客户端断开连接
+
+**为什么密钥的传递需要使用非对称加密？**
+
+使用非对称加密是为了后面客户端生成的`Pre-master secret`密钥的安全，通过上面的步骤能得知，服务器向客户端发送公钥证书这一步是有可能被别人拦截的，如果使用对称加密的话，在客户端向服务端发送`Pre-master secret`密钥的时候，被黑客拦截的话，就能够使用公钥进行解码，就无法保证`Pre-master secret`密钥的安全了
+
+**双向认证了解么？**
+
+上面的HTTPS的通信流程只验证了服务端的身份，而服务端没有验证客户端的身份，双向认证是服务端也要确保客户端的身份，大概流程是客户端在校验完服务器的证书之后，会向服务器发送自己的公钥，然后服务端用公钥加密产生一个新的密钥，传给客户端，客户端再用私钥解密，以后就用此密钥进行对称加密的通信
+
+#### 13. 如何用Charles抓HTTPS的包？其中原理和流程是什么？
+
+**流程：**
+
+* 首先在手机上安装Charles证书
+* 在代理设置中开启Enable SSL Proxying
+* 之后添加需要抓取服务端的地址
+
+**原理：**
+
+`Charles`作为中间人，对客户端伪装成服务端，对服务端伪装成客户端。简单来说：
+
+* 截获客户端的HTTPS请求，伪装成中间人客户端去向服务端发送HTTPS请求
+* 接受服务端返回，用自己的证书伪装成中间人服务端向客户端发送数据内容。
+
+具体流程如下图:[扯一扯HTTPS单向认证、双向认证、抓包原理、反抓包策略](https://juejin.im/post/5c9cbf1df265da60f6731f0a#heading-3)
+
+![](https://user-gold-cdn.xitu.io/2019/12/26/16f41a2f14a97620?imageView2/0/w/1280/h/960/ignore-error/1)
+
+#### 14. 什么是中间人攻击？如何避免？
+
+中间人攻击就是截获到客户端的请求以及服务器的响应，比如`Charles`抓取HTTPS的包就属于中间人攻击。
+
+避免的方式：客户端可以预埋证书在本地，然后进行证书的比较是否是匹配的
+
+#### 15. 了解编译的过程么？分为哪几个步骤？
+
+**1:预编译：主要处理以“#”开始的预编译指令。**
+
+**2:编译：**
+
+* 词法分析：将字符序列分割成一系列的记号。
+
+* 语法分析：根据产生的记号进行语法分析生成语法树。
+
+* 语义分析：分析语法树的语义，进行类型的匹配、转换、标识等。
+
+* 中间代码生成：源码级优化器将语法树转换成中间代码，然后进行源码级优化，比如把 1+2 优化为 3。中间代码使得编译器被分为前端和后端，不同的平台可以利用不同的编译器后端将中间代码转换为机器代码，实现跨平台。
+
+* 目标代码生成：此后的过程属于编译器后端，代码生成器将中间代码转换成目标代码（汇编代码），其后目标代码优化器对目标代码进行优化，比如调整寻址方式、使用位移代替乘法、删除多余指令、调整指令顺序等。
+
+
+**3:汇编：汇编器将汇编代码转变成机器指令。**
+
+* 静态链接：链接器将各个已经编译成机器指令的目标文件链接起来，经过重定位过后输出一个可执行文件。
+
+* 装载：装载可执行文件、装载其依赖的共享对象。
+
+* 动态链接：动态链接器将可执行文件和共享对象中需要重定位的位置进行修正。
+
+* 最后，进程的控制权转交给程序入口，程序终于运行起来了。
+
+#### 16. 静态链接了解么？静态库和动态库的区别？
+* 静态链接是指将多个目标文件合并为一个可执行文件，直观感觉就是将所有目标文件的段合并。需要注意的是可执行文件与目标文件的结构基本一致，不同的是是否“可执行”。
+
+* 静态库：链接时完整地拷贝至可执行文件中，被多次使用就有多份冗余拷贝。
+
+* 动态库：链接时不复制，程序运行时由系统动态加载到内存，供程序调用，系统只加载一次，多个程序共用，节省内存。
+
+#### 17. App网络层有哪些优化策略？
+
+* 优化DNS解析和缓存
+* 对传输的数据进行压缩，减少传输的数据
+* 使用缓存手段减少请求的发起次数
+* 使用策略来减少请求的发起次数，比如在上一个请求未着地之前，不进行新的请求
+* 避免网络抖动，提供重发机制
+
+
+#### 18：[self class] 与 [super class]
+
+```
+@implementation Son : Father
+- (id)init
+{
+    self = [super init];
+    if (self)
+    {
+        NSLog(@"%@", NSStringFromClass([self class]));
+        NSLog(@"%@", NSStringFromClass([super class]));
+    }
+return self;
+}
+@end
+```
+
+**self和super的区别：**
+
+* `self` 是类的一个隐藏参数，每个方法的实现的第一个参数即为`self`。
+
+* super并不是隐藏参数，它实际上只是一个**”编译器标示符”**，它负责告诉编译器，当调用方法时，去调用父类的方法，而不是本类中的方法。
+
+在调用`[super class]`的时候，`runtime`会去调用`objc_msgSendSuper`方法，而不是`objc_msgSend`
+
+```
+OBJC_EXPORT void objc_msgSendSuper(void /* struct objc_super *super, SEL op, ... */ )
+ 
+ 
+/// Specifies the superclass of an instance. 
+struct objc_super {
+    /// Specifies an instance of a class.
+    __unsafe_unretained id receiver;
+ 
+    /// Specifies the particular superclass of the instance to message. 
+#if !defined(__cplusplus)  &&  !__OBJC2__
+    /* For compatibility with old objc-runtime.h header */
+    __unsafe_unretained Class class;
+#else
+    __unsafe_unretained Class super_class;
+#endif
+    /* super_class is the first class to search */
+}
+```
+
+在`objc_msgSendSuper`方法中，第一个参数是一个`objc_super`的结构体，这个结构体里面有两个变量，一个是接收消息的`receiver`，一个是当前类的父类`super_class`。
+
+**入院考试第一题错误的原因就在这里，误认为`[super class]`是调用的`[super_class class]`。**
+
+**`objc_msgSendSuper`的工作原理应该是这样的:**
+
+* 从`objc_super`结构体指向的`superClass`父类的方法列表开始查找selector，
+
+* 找到后以`objc->receiver`去调用父类的这个`selector`。注意，最后的调用者是`objc->receiver`，而不是`super_class`！
+
+**那么`objc_msgSendSuper`最后就转变成**
+
+```
+objc_msgSend(objc_super->receiver, @selector(class))
+ 
++ (Class)class {
+    return self;
+}
+```
+
+#### 18.isKindOfClass 与 isMemberOfClass
+
+下面代码输出什么？
+
+```
+@interface Sark : NSObject
+ @end
+ 
+ @implementation Sark
+ @end
+ 
+ int main(int argc, const char * argv[]) {
+@autoreleasepool {
+    BOOL res1 = [(id)[NSObject class] isKindOfClass:[NSObject class]];
+    BOOL res2 = [(id)[NSObject class] isMemberOfClass:[NSObject class]];
+    BOOL res3 = [(id)[Sark class] isKindOfClass:[Sark class]];
+    BOOL res4 = [(id)[Sark class] isMemberOfClass:[Sark class]];
+ 
+   NSLog(@"%d %d %d %d", res1, res2, res3, res4);
+}
+return 0;
+}
+```
+
+先来分析一下源码这两个函数的对象实现
+```
++ (Class)class {
+    return self;
+}
+ 
+- (Class)class {
+    return object_getClass(self);
+}
+ 
+Class object_getClass(id obj)
+{
+    if (obj) return obj->getIsa();
+    else return Nil;
+}
+ 
+inline Class 
+objc_object::getIsa() 
+{
+    if (isTaggedPointer()) {
+        uintptr_t slot = ((uintptr_t)this >> TAG_SLOT_SHIFT) & TAG_SLOT_MASK;
+        return objc_tag_classes[slot];
+    }
+    return ISA();
+}
+ 
+inline Class 
+objc_object::ISA() 
+{
+    assert(!isTaggedPointer()); 
+    return (Class)(isa.bits & ISA_MASK);
+}
+ 
++ (BOOL)isKindOfClass:(Class)cls {
+    for (Class tcls = object_getClass((id)self); tcls; tcls = tcls->superclass) {
+        if (tcls == cls) return YES;
+    }
+    return NO;
+}
+ 
+- (BOOL)isKindOfClass:(Class)cls {
+    for (Class tcls = [self class]; tcls; tcls = tcls->superclass) {
+        if (tcls == cls) return YES;
+    }
+    return NO;
+}
+ 
++ (BOOL)isMemberOfClass:(Class)cls {
+    return object_getClass((id)self) == cls;
+}
+ 
+- (BOOL)isMemberOfClass:(Class)cls {
+    return [self class] == cls;
+}
+```
+
+首先题目中NSObject 和 Sark分别调用了class方法。
+
+* `+ (BOOL)isKindOfClass:(Class)cls`方法内部，会先去获得`object_getClass`的类，而`object_getClass`的源码实现是去调用当前类的`obj->getIsa()`，最后在`ISA()`方法中获得`meta class`的指针。
+
+* 接着在`isKindOfClass`中有一个循环，先判断`class`是否等于`meta class`，不等就继续循环判断是否等于`super class`，不等再继续取`super class`，如此循环下去。
+
+![](https://images2015.cnblogs.com/blog/434405/201512/434405-20151227181339499-1243485875.png)
+
+* `[NSObject class]`执行完之后调用`isKindOfClass`，第一次判断先判断`NSObject` 和 `NSObject`的`meta class`是否相等，之前讲到`meta class`的时候放了一张很详细的图，从图上我们也可以看出，`NSObject`的`meta class`与本身不等。
+
+* 接着第二次循环判断`NSObject`与`meta class`的`superclass`是否相等。还是从那张图上面我们可以看到：`Root class(meta)` 的`superclass` 就是 `Root class(class)`，也就是`NSObject`本身。所以第二次循环相等，于是第一行`res1`输出应该为`YES`。
+
+* 同理，`[Sark class]`执行完之后调用`isKindOfClass`，第一次`for`循环，`Sark`的`Meta Class`与`[Sark class]`不等，第二次`for循环`，`Sark` `Meta Class的super class` 指向的是 `NSObject Meta Class`， 和 `Sark Class`不相等。
+
+* 第三次for循环，`NSObject Meta Class`的`super class`指向的是`NSObject Class`，和 `Sark Class` 不相等。第四次循环，`NSObject Class`的 `super class` 指向 `nil`， 和 `Sark Class`不相等。第四次循环之后，退出循环，所以第三行的`res3输出为NO`。
+
+* 如果把这里的Sark改成它的实例对象，`[sark isKindOfClass:[Sark class]`，那么此时就应该输出`YES`了。因为在`isKindOfClass`函数中，判断sark的`meta class`是自己的元类`Sark`，第一次for循环就能输出`YES`了。
+
+* `isMemberOfClass`的源码实现是拿到自己的`isa指针`和自己比较，是否相等。
+
+* 第二行`isa` 指向 `NSObject` 的 `Meta Class`，所以和 `NSObject Class`不相等。第四行，`isa`指向`Sark`的`Meta Class`，和`Sark Class`也不等，所以第二行`res2`和第四行`res4`都输出NO。
+
+
+#### 19.
