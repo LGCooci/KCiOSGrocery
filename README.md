@@ -1096,8 +1096,8 @@ OC中提供了`NSValue`、`NSNumber`来封装C语言的基本类型，这样我�
 > - **M** 是数据模型`Model`，负责处理数据，以及数据改变时发出通知(Notification、KVO)，Model和View不能直接进行通信，这样会违背MVC设计模式；
 > - **V** 是视图`View`，用来展示界面，和用户进行交互，为了解耦合一般不会直接持有 或者 操作数据层中的数据模型(可以通过`action-target`、`delegate`、`block`等方式解耦)；
 > - **C** 是控制器`Controller`用来调节`Model`和`View`之间的交互，可以直接与Model还有View进行通信，操作Model进行数据更新，刷新View。
->> 优点：View、Model低耦合、高复用、容易维护。
->> 缺点：Controller的代码过于臃肿，如果View与Model直接交互会导致View和Model之间的耦合性比较大、网络逻辑会加重Controller的臃肿。
+> - 优点：View、Model低耦合、高复用、容易维护。
+> - 缺点：Controller的代码过于臃肿，如果View与Model直接交互会导致View和Model之间的耦合性比较大、网络逻辑会加重Controller的臃肿。
 
 * MVVM：Model - View - ViewModel
 > - **MVVM**衍生于**MVC**，是MVC的一种演进，促进了UI代码和业务逻辑的分离，抽取Controller中的展示逻辑放到ViewModel里边。
@@ -1105,13 +1105,12 @@ OC中提供了`NSValue`、`NSNumber`来封装C语言的基本类型，这样我�
 > - **V：** 就是`View`和`Controller`联系到一起，视为是一个组件`View`。View和Controller都不能直接引用模型Model，可以引用视图模型ViewModel。ViewController 尽量不涉及业务逻辑，让 ViewModel 去做这些事情。ViewController 只是一个中间人，负责接收 View 的事件、调用 ViewModel 的方法、响应 ViewModel 的变化。
 > - **VM：**`ViewModel`负责封装业务逻辑、网络处理和数据缓存。使用ViewModel会轻微的增加代码量，但是总体上减少了代码的复杂性。`ViewModel`之间可以有依赖。
 * 注意事项：
->> - View引用ViewModel，但反过来不行，因为如果VM跟V产生了耦合，不方便复用。即不要在viewModel中引入#import UIKit.h，任何视图本身的引用都不应该放在viewModel中 (**注意：基本要求，必须满足**)。
->> - ViewModel可以引用Model，但反过来不行。
->> 
->> 优点：
->> 低耦合、可复用、数据流向清晰、而且兼容MVC，便于代码的移植、并且ViewModel可以拆出来独立开发、方便测试。
->> 缺点：
->> 类会增多、ViewModel会越来越庞大、调用复杂度增加、双向绑定数据会导致问题调试变得困难。
-> 总结：
+> 1. View引用ViewModel，但反过来不行，因为如果VM跟V产生了耦合，不方便复用。即不要在viewModel中引入#import UIKit.h，任何视图本身的引用都不应该放在viewModel中 (**注意：基本要求，必须满足**)。
+> 2. ViewModel可以引用Model，但反过来不行。
+* 优点：
+> 低耦合、可复用、数据流向清晰、而且兼容MVC，便于代码的移植、并且ViewModel可以拆出来独立开发、方便测试。
+* 缺点：
+> 类会增多、ViewModel会越来越庞大、调用复杂度增加、双向绑定数据会导致问题调试变得困难。
+* 总结：
 > - **MVVM**其实是MVC的变种。MVVM只是帮MVC中的Controller瘦身，把一些逻辑代码和网络请求分离出去。不让Controller处理更多的东西，不会变得臃肿，MVVM和MVC可以根据实际需求进行灵活选择。
 > - **MVVM** 在使用当中，通常还会利用双向绑定技术，使得Model 变化时，ViewModel会自动更新，而ViewModel变化时，View 也会自动变化。OC中可以用**RAC(ReactiveCocoa)**函数响应式框架来实现响应式编程。
