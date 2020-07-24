@@ -10,6 +10,8 @@
 > 
 > 有一起加入同步更新这个仓库的小伙伴，请微信我
 
+![](https://github.com/LGCooci/LGiOSQuestions/blob/master/Cooci微信.jpeg)
+
 #### 1：谈谈你对KVC的理解
 
 `KVC`可以通过`key`直接访问对象的属性，或者给对象的属性赋值，这样可以在运行时动态的访问或修改对象的属性
