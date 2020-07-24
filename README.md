@@ -10,7 +10,7 @@
 > 
 > 有一起加入同步更新这个仓库的小伙伴，请微信我
 
-<img src="https://github.com/LGCooci/LGiOSQuestions/blob/master/Cooci微信.jpeg" width="200" height="200" alt="抖音小程序"/><br/>
+<img src="https://github.com/LGCooci/LGiOSQuestions/blob/master/Cooci微信.jpeg" width="167" height="200" alt="Cooci微信"/><br/>
 
 #### 1：谈谈你对KVC的理解
 
