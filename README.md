@@ -1092,7 +1092,7 @@ OC中提供了`NSValue`、`NSNumber`来封装C语言的基本类型，这样我�
 > MVC和MVVM算是架构。
 
 #### 27. 架构设计
-1. MVC：
+##### 1. MVC：
 > **M** 是数据模型`Model`，负责处理数据，以及数据改变时发出通知(Notification、KVO)，Model和View不能直接进行通信，这样会违背MVC设计模式；
 > **V** 是视图`View`，用来展示界面，和用户进行交互，为了解耦合一般不会直接持有 或者 操作数据层中的数据模型(可以通过`action-target`、`delegate`、`block`等方式解耦)；
 > **C** 是控制器`Controller`用来调节`Model`和`View`之间的交互，可以直接与Model还有View进行通信，操作Model进行数据更新，刷新View。
@@ -1100,7 +1100,7 @@ OC中提供了`NSValue`、`NSNumber`来封装C语言的基本类型，这样我�
 > - **优点：**View、Model低耦合、高复用、容易维护。
 > - **缺点：**Controller的代码过于臃肿，如果View与Model直接交互会导致View和Model之间的耦合性比较大、网络逻辑会加重Controller的臃肿。
 
-1. MVVM：Model - View - ViewModel
+##### 2. MVVM：Model - View - ViewModel
 > - **MVVM**衍生于**MVC**，是MVC的一种演进，促进了UI代码和业务逻辑的分离，抽取Controller中的展示逻辑放到ViewModel里边。
 > - **M：** 数据模型`Model`。
 > - **V：** 就是`View`和`Controller`联系到一起，视为是一个组件`View`。View和Controller都不能直接引用模型Model，可以引用视图模型ViewModel。ViewController 尽量不涉及业务逻辑，让 ViewModel 去做这些事情。ViewController 只是一个中间人，负责接收 View 的事件、调用 ViewModel 的方法、响应 ViewModel 的变化。
