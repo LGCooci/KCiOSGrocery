@@ -928,3 +928,127 @@ extension Array where Element : Comparable{
     }
 }
 ```
+
+#### 20. OC数据类型
+
+![](https://upload-images.jianshu.io/upload_images/869753-5c06e93492e0f8bb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+* 基本数据类型
+ C语言基本数据类型（如short、int、float等）在OC中都不是对象，只是一定字节的内存空间用于存储数值，他们都不具备对象的特性，没有属性方法可以被调用。
+
+* OC中的基本数据类型：
+> - `NSInteger`(相当于long型整数)、
+> - `NSUInteger`(相当于unsigned long型整数)、
+> - `CGFloat`(在64位系统相当于double，32位系统相当于float)等。
+> - 他们并不是类，只是用`typedef`对基本数据类型进行了重定义，**`他们依然只是基本数据类型`**。
+> - **枚举类型：**其本质是无符号整数。
+> - **BOOL类型：**是宏定义，OC底层是使用signed char来代表BOOL。
+
+* 指针数据类型
+> **指针数据类型包括：**类class、id。
+
+> - **类class：**`NSString`、`NSSet`、`NSArray`、`NSMutableArray`、`NSDictionary`、`NSMutableDictionary`、`NSValue`、`NSNumber(继承NSValue)`等，都是class，创建后便是对象，继承**NSObject**。
+OC中提供了`NSValue`、`NSNumber`来封装C语言的基本类型，这样我们就可以让他们具有面向对象的特征了。
+> - **id：**`id`是指向Objective-C对象的指针，等价于C语言中的`void*`，可以映射任何对象指针指向他，或者映射它指向其他的对象。常见的id类型就是类的delegate属性。
+
+> **集合NSSet和数组NSArray区别：**
+> - 都是存储不同的对象的地址；
+> - 但是NSArray是有序的集合，NSSet是无序的集合，它们俩可以互相转换。
+> - NSSet会自动删除重复元素。
+> - 集合是一种哈希表，运用散列算法，查找集合中的元素比数组速度更快，但是它没有顺序。
+
+#####③ 构造类型
+> **构造类型包括：**结构体、联合体
+
+> - **结构体：**`struct`，将多个基本数据类型的变量组合成一个整体。结构体中访问内部成员用点运算符访问。
+> - **联合体(共用体)：**`union`，有些类似结构体struct的一种数据结构，联合体(union)和结构体(struct)同样可以包含很多种数据类型和变量。
+
+> 结构体和联合体的区别：
+> - 结构体(struct)中所有变量是“共存”的，同一时刻每个成员都有值，其sizeof为所以成员的和。
+    **优点：**是“有容乃大”，全面；
+    **缺点：**是struct内存空间的分配是粗放的，不管用不用，全分配，会造成内存浪费。
+> - 联合体(union)中各变量是“互斥”的，同一时刻只有一个成员有值，其sizeof为最长成员的sizeof。
+    **优点：**是内存使用更为精细灵活，也节省了内存空间。
+>    **缺点：**就是不够“包容”，修改其中一个成员时会覆盖原来的成员值；
+
+####4. property和属性修饰符
+> **@property的本质**是 ivar(实例变量) + setter + getter.
+>
+> **我们每次增加一个属性时内部都做了什么：**
+> 1.系统都会在 `ivar_list` 中添加一个成员变量的描述；
+> 2.在 `method_list` 中增加 `setter` 与 `getter` 方法的描述；
+> 3.在属性列表中增加一个属性的描述；
+> 4.然后计算该属性在对象中的偏移量；
+> 5.给出 `setter` 与 `getter` 方法对应的实现，在 `setter` 方法中从偏移量的位置开始赋值，在 `getter` 方法中从偏移量开始取值，为了能够读取正确字节数，系统对象偏移量的指针类型进行了类型强转。
+
+> **修饰符：**
+**MRC下：**assign、retain、copy、readwrite、readonly、nonatomic、atomic等。
+**ARC下：**assign、strong、weak、copy、readwrite、readonly、nonatomic、atomic、nonnull、nullable、null_resettable、_Null_unspecified等。
+
+> `assign`：用于基本数据类型，不更改引用计数。如果修饰对象(对象在堆需手动释放内存，基本数据类型在栈系统自动释放内存)，会导致对象释放后指针不置为nil 出现野指针。
+> `retain`：和strong一样，释放旧对象，传入的新对象引用计数+1；在MRC中和release成对出现。
+> `strong`：在ARC中使用，告诉系统把这个对象保留在堆上，直到没有指针指向，并且ARC下不需要担心引用计数问题，系统会自动释放。
+> `weak`：在被强引用之前，尽可能的保留，不改变引用计数；weak引用是弱引用，你并没有持有它；它本质上是分配一个不被持有的属性，当引用者被销毁(dealloc)时，weak引用的指针会自动被置为nil。**可以避免循环引用。**
+> `copy`：一般用来修饰不可变类型属性字段，如：`NSString`、`NSArray`、`NSDictionary`等。用copy修饰可以防止本对象属性受外界影响，在`NSMutableString`赋值给`NSString`时，修改前者 会导致 后者的值跟着变化。还有`block`也经常使用 copy 修饰符，但是其实在ARC中编译器会自动对block进行copy操作，和strong的效果是一样的。但是在MRC中方法内部的block是在栈区，使用copy可以把它放到堆区。
+> `readwrite`：可以读、写；编译器会自动生成setter/getter方法。
+> `readonly`：只读；会告诉编译器不用自动生成setter方法。属性不能被赋值。
+> `nonatomic`：非原子性访问。用nonatomic意味着可以多线程访问变量，会导致读写线程不安全。但是会提高执行性能。
+> `atomic`：原子性访问。编译器会自动生成互斥锁，对 setter 和 getter 方法进行加锁来保证属性的 赋值和取值 原子性操作是线程安全的，但不包括可变属性的操作和访问。比如我们对数组进行操作，给数组添加对象或者移除对象，是不在atomic的负责范围之内的，所以给被atomic修饰的数组添加对象或者移除对象是没办法保证线程安全的。**原子性访问的缺点是会消耗性能导致执行效率慢。**
+> `nonnull`：设置属性或方法参数不能为空，专门用来修饰指针的，不能用于基本数据类型。
+> `nullable`：设置属性或方法参数可以为空。
+> `null_resettable`：设置属性，get方法不能返回为空，set方法可以赋值为空。
+> `_Null_unspecified`：设置属性或方法参数不确定是否为空。
+> 后四个属性应该主要就是为了提高开发规范，提示使用的人应该传什么样的值，如果违反了对规范值的要求，就会有警告。
+
+> **weak修饰的对象释放则自动被置为nil的实现原理：**
+> Runtime维护了一个weak表，存储指向某个对象的所有weak指针。weak表其实是一个hash（哈希）表，Key是所指对象的地址，Value是weak指针的地址数组（这个地址的值是所指对象的地址）。
+>
+> weak 的实现原理可以概括一下三步：
+1、初始化时：runtime会调用objc_initWeak函数，初始化一个新的weak指针指向对象的地址。
+2、添加引用时：objc_initWeak函数会调用 objc_storeWeak() 函数， objc_storeWeak() 的作用是更新指针指向，创建对应的弱引用表。
+3、释放时，调用clearDeallocating函数。clearDeallocating函数首先根据对象地址获取所有weak指针地址的数组，然后遍历这个数组把其中的数据设为nil，最后把这个entry从weak表中删除，最后清理对象的记录。
+
+####5. 成员变量`ivar`和属性`property`的区别，以及不同关键字的作用
+> **成员变量：**成员变量的默认修饰符是`@protected`、不会自动生成set和get方法，需要手动实现、不能使用点语法调用，因为没有set和get方法，只能使用`->`。
+> **属性：**属性会默认生成带下划线的成员变量和`setter/getter`方法、可以用点语法调用，实际调用的是set和get方法。
+**注意：分类中添加的属性是不会自动生成  `setter/getter`方法的，必须要手动添加。**
+> **实例变量：**class类进行实例化出来的对象为实例对象
+
+> 关键字作用：
+> - **访问范围关键字**
+`@public`：声明公共实例变量，在任何地方都能直接访问对象的成员变量。
+`@private`：声明私有实例变量，只能在当前类的对象方法中直接访问，子类要访问需要调用父类的get/set方法。
+`@protected`：可以在当前类及其子类对象方法中直接访问(系统默认)。
+`@package`：在同一个包下就可以直接访问，比如说在同一个框架。
+
+> - **关键字**
+`@property`：声明属性，自动生成一个以下划线开头的成员变量_propertyName(默认用@private修饰)、属性setter、getter方法的声明、属性setter、getter方法的实现。**注意：**在`协议@protocol`中只会生成getter和setter方法的声明，所以不仅需要手动实现getter和setter方法还需要手动定义变量。
+`@sythesize`：修改@property自动生成的_propertyName成员变量名，`@synthesize propertyName = newName；`。
+`@dynamic`：告诉编译器：属性的 setter 与 getter 方法由用户自己实现，不自动生成。**谨慎使用：**如果对属性赋值取值可以编译成功，但运行会造成程序崩溃，这就是常说的动态绑定。
+`@interface`：声明类
+`@implementation`：类的实现
+`@selecter`：创建一个SEL，类成员指针
+`@protocol`：声明协议
+`@autoreleasepool`：ARC中的自动释放池
+`@end`：类结束
+
+####6. 类簇
+- **类簇**是Foundation框架中广泛使用的设计模式。**类簇在公共抽象超类下对多个私有的具体子类进行分组**。以这种方式对类进行分组简化了面向对象框架的公共可见体系结构，而不会降低其功能丰富度。**类簇是基于抽象工厂设计模式的**。
+
+> 常见的类簇有 `NSString`、`NSArray`、`NSDictionary`等。
+**以数组为例：**不管创建的是可变还是不可变的数组，在`alloc`之后得到的类都是 `__NSPlaceholderArray`。而当我们 `init` 一个不可变的空数组之后，得到的是` __NSArray0`；如果有且只有一个元素，那就是 `__NSSingleObjectArrayI`；有多个元素的，叫做 `__NSArrayI`；`init` 出来一个可变数组的话，都是 `__NSArrayM`。
+
+> **优点：**
+> - 可以将抽象基类背后的复杂细节隐藏起来。
+> - 程序员不会需要记住各种创建对象的具体类实现，简化了开发成本，提高了开发效率。
+> - 便于进行封装和组件化。
+> - 减少了 if-else 这样缺乏扩展性的代码。
+> - 增加新功能支持不影响其他代码。
+> **缺点：**
+> - 已有的类簇非常不好扩展。
+
+> **我们运用类簇的场景：**
+> 1. 出现 bug 时，可以通过崩溃报告中的类簇关键字，快速定位 bug 位置。
+> 2. 在实现一些固定且并不需要经常修改的事物时，可以高效的选择类簇去实现。例：
+>    - 针对不同版本，不同机型往往需要不同的设置，这时可以选择使用类簇。
+>    - app 的设置页面这种并不需要经常修改的页面，可以使用类簇去创建大量重复的布局代码。
