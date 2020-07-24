@@ -967,7 +967,7 @@ OC中提供了`NSValue`、`NSNumber`来封装C语言的基本类型，这样我�
     优点：是内存使用更为精细灵活，也节省了内存空间。
 >   缺点：就是不够“包容”，修改其中一个成员时会覆盖原来的成员值；
 
-####22. property和属性修饰符
+#### 22. property和属性修饰符
 * @property的本质是 ivar(实例变量) + setter + getter.
 
 * 我们每次增加一个属性时内部都做了什么：
@@ -1001,13 +1001,13 @@ OC中提供了`NSValue`、`NSNumber`来封装C语言的基本类型，这样我�
 > 2. 添加引用时：objc_initWeak函数会调用 objc_storeWeak() 函数， objc_storeWeak() 的作用是更新指针指向，创建对应的弱引用表。
 > 3. 释放时，调用clearDeallocating函数。clearDeallocating函数首先根据对象地址获取所有weak指针地址的数组，然后遍历这个数组把其中的数据设为nil，最后把这个entry从weak表中删除，最后清理对象的记录。
 
-# 23. 成员变量`ivar`和属性`property`的区别，以及不同关键字的作用
+#### 23. 成员变量`ivar`和属性`property`的区别，以及不同关键字的作用
 > 成员变量：成员变量的默认修饰符是`@protected`、不会自动生成set和get方法，需要手动实现、不能使用点语法调用，因为没有set和get方法，只能使用`->`。
 > 属性：属性会默认生成带下划线的成员变量和`setter/getter`方法、可以用点语法调用，实际调用的是set和get方法。
 * 注意：分类中添加的属性是不会自动生成  `setter/getter`方法的，必须要手动添加。
 > 实例变量：class类进行实例化出来的对象为实例对象。
 
-# 24. 关键字作用：
+#### 24. 关键字作用：
 * 访问范围关键字？
 > `@public`：声明公共实例变量，在任何地方都能直接访问对象的成员变量。
 > `@private`：声明私有实例变量，只能在当前类的对象方法中直接访问，子类要访问需要调用父类的get/set方法。
@@ -1025,7 +1025,7 @@ OC中提供了`NSValue`、`NSNumber`来封装C语言的基本类型，这样我�
 > `@autoreleasepool`：ARC中的自动释放池
 > `@end`：类结束
 
-# 25. 类簇
+#### 25. 类簇
 > - 是Foundation框架中广泛使用的设计模式。
 > - 类簇在公共抽象超类下对多个私有的具体子类进行分组。
 > - 以这种方式对类进行分组简化了面向对象框架的公共可见体系结构，而不会降低其功能丰富度。
@@ -1049,3 +1049,69 @@ OC中提供了`NSValue`、`NSNumber`来封装C语言的基本类型，这样我�
 > 例：
 > 针对不同版本，不同机型往往需要不同的设置，这时可以选择使用类簇。
 > app 的设置页面这种并不需要经常修改的页面，可以使用类簇去创建大量重复的布局代码。
+
+#### 26. 设计模式
+* 创建型模式：
+> - 单例模式：在整个应用程序中，共享一份资源。保证在程序运行过程中，一个类只有一个实例，而且该实例只提供一个全局访问点供外界访问，从而方便控制实例个数，节约系统资源。
+> 优点是：提供了对唯一实例的受控访问、可扩展、避免频繁创建销毁对象影响性能。
+> 缺点是：延长了声明周期，一直存在占用内存。如果两个单例循环依赖会造成死锁，所以尽量不去产生单例间的依赖关系。
+> - 工厂方法模式：通过类继承创建抽象产品，创建一种产品，子类化创建者并重载工厂方法以创建新产品。
+> - 抽象工厂模式：通过对象组合创建抽象产品，可以创建多系列产品，必须修改父类的接口才能支持新的产品。
+
+* 结构型模式：
+> - 代理模式：代理用来处理事件的监听和参数传递。@required修饰必须实现这个协议方法方法，@optional修饰是可选实现。使用方法时最好先判断方法是否实现`respondsToSelector: `，避免找不到方法而崩溃。
+> **delegate和block、Notification对比优缺点：**delegate和block是一对一通信、block比delegate更加简洁清晰，但是如果通信事件较多时delegate运行成本较低且不易造成循环引用；通知适合一对多通信，代码清晰简单，但问题查找溯源会比较困难，并且注册通知要注意在合适的时间移除，避免对野指针发送消息引起崩溃（**注意：**iOS9之后已经做了弱引用处理不需要移除了，之前版本使用不安全引用__unsafe_unretained是为了兼容旧版本）。
+> - 装饰模式：在不必改变原类文件和使用继承的情况下，动态地扩展一个对象的功能。如：**分类**。
+> - 享元模式：使用共享物件，减少同一类对象的大量创建。如：**UITableviewCell复用**。
+
+* 行为型模式：
+> - 观察者模式：其本质上是一种`发布-订阅`模型，用来消除具有不同行为的对象之间的耦合，通过这一模式，不同对象可以协同工作。如：**KVO**。
+> - 命令模式：是一种将方法调用封装为对象的设计模式，在iOS中具体实现为**NSInvocation**。下边为NSInvocation的实现代码。
+```
+- (void)viewDidLoad {
+    NSMethodSignature *signature = [ViewController instanceMethodSignatureForSelector:@selector(sendMessageWithPhone:WithName:)]; // 方法签名：用来获得方法的返回类型和参数类型
+    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
+    invocation.target = self; // 目标：接收消息的对象
+    invocation.selector = @selector(sendMessageWithPhone:WithName:); // 选择器：被发送的消息, 方法必须和签名中的方法一致。
+    
+    NSString *phone = @"13512345678";
+    // 注意：设置参数的索引时不能从0开始，因为0已经被self占用，1已经被_cmd占用
+    [invocation setArgument:&phone atIndex:2]; // 参数：可以添加任意数量的参数。
+    NSString *name = @"Dezi";
+    [invocation setArgument:&name atIndex:3];
+    /*
+     注：调用invocation的invoke方法，就代表需要执行NSInvocation对象中指定对象的指定方法，并且传递指定的参数
+     */
+    [invocation invoke];
+}
+- (void)sendMessageWithPhone:(NSString*)phone WithName:(NSString*)name {
+    NSLog(@"电话号=%@, 姓名=%@",phone, name);
+}
+// 电话号=13512345678, 姓名Dezi
+```
+> MVC和MVVM算是架构。
+
+#### 27. 架构设计
+* MVC：
+> - **M** 是数据模型`Model`，负责处理数据，以及数据改变时发出通知(Notification、KVO)，Model和View不能直接进行通信，这样会违背MVC设计模式；
+> - **V** 是视图`View`，用来展示界面，和用户进行交互，为了解耦合一般不会直接持有 或者 操作数据层中的数据模型(可以通过`action-target`、`delegate`、`block`等方式解耦)；
+> - **C** 是控制器`Controller`用来调节`Model`和`View`之间的交互，可以直接与Model还有View进行通信，操作Model进行数据更新，刷新View。
+>> 优点：View、Model低耦合、高复用、容易维护。
+>> 缺点：Controller的代码过于臃肿，如果View与Model直接交互会导致View和Model之间的耦合性比较大、网络逻辑会加重Controller的臃肿。
+
+* MVVM：Model - View - ViewModel
+> - **MVVM**衍生于**MVC**，是MVC的一种演进，促进了UI代码和业务逻辑的分离，抽取Controller中的展示逻辑放到ViewModel里边。
+> - **M：** 数据模型`Model`。
+> - **V：** 就是`View`和`Controller`联系到一起，视为是一个组件`View`。View和Controller都不能直接引用模型Model，可以引用视图模型ViewModel。ViewController 尽量不涉及业务逻辑，让 ViewModel 去做这些事情。ViewController 只是一个中间人，负责接收 View 的事件、调用 ViewModel 的方法、响应 ViewModel 的变化。
+> - **VM：**`ViewModel`负责封装业务逻辑、网络处理和数据缓存。使用ViewModel会轻微的增加代码量，但是总体上减少了代码的复杂性。`ViewModel`之间可以有依赖。
+* 注意事项：
+>> - View引用ViewModel，但反过来不行，因为如果VM跟V产生了耦合，不方便复用。即不要在viewModel中引入#import UIKit.h，任何视图本身的引用都不应该放在viewModel中 (**注意：基本要求，必须满足**)。
+>> - ViewModel可以引用Model，但反过来不行。
+>> 
+>> 优点：
+>> 低耦合、可复用、数据流向清晰、而且兼容MVC，便于代码的移植、并且ViewModel可以拆出来独立开发、方便测试。
+>> 缺点：
+>> 类会增多、ViewModel会越来越庞大、调用复杂度增加、双向绑定数据会导致问题调试变得困难。
+> 总结：
+> - **MVVM**其实是MVC的变种。MVVM只是帮MVC中的Controller瘦身，把一些逻辑代码和网络请求分离出去。不让Controller处理更多的东西，不会变得臃肿，MVVM和MVC可以根据实际需求进行灵活选择。
+> - **MVVM** 在使用当中，通常还会利用双向绑定技术，使得Model 变化时，ViewModel会自动更新，而ViewModel变化时，View 也会自动变化。OC中可以用**RAC(ReactiveCocoa)**函数响应式框架来实现响应式编程。
