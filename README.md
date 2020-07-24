@@ -7,6 +7,8 @@
 > 本人博客地址：[Cooci-掘金](https://juejin.im/user/5c3f3c415188252b7d0ea40c)
 > 
 > [Github 持续更新面试题](https://github.com/LGCooci/LGiOSQuestions) 
+> 
+> 有一起加入同步更新这个仓库的小伙伴，请微信我
 
 #### 1：谈谈你对KVC的理解
 
