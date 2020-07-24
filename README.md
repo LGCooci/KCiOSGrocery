@@ -10,7 +10,7 @@
 > 
 > 有一起加入同步更新这个仓库的小伙伴，请微信我
 
-![](https://github.com/LGCooci/LGiOSQuestions/blob/master/Cooci微信.jpeg)
+<img src="https://github.com/LGCooci/LGiOSQuestions/blob/master/Cooci微信.jpeg" width="200" height="200" alt="抖音小程序"/><br/>
 
 #### 1：谈谈你对KVC的理解
 
@@ -575,7 +575,7 @@ objc_object::ISA()
 
 * 接着在`isKindOfClass`中有一个循环，先判断`class`是否等于`meta class`，不等就继续循环判断是否等于`super class`，不等再继续取`super class`，如此循环下去。
 
-![](https://images2015.cnblogs.com/blog/434405/201512/434405-20151227181339499-1243485875.png)
+![](https://github.com/LGCooci/LGiOSQuestions/blob/master/资源文件/isa流程图.png)
 
 * `[NSObject class]`执行完之后调用`isKindOfClass`，第一次判断先判断`NSObject` 和 `NSObject`的`meta class`是否相等，之前讲到`meta class`的时候放了一张很详细的图，从图上我们也可以看出，`NSObject`的`meta class`与本身不等。
 
