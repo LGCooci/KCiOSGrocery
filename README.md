@@ -11,11 +11,7 @@
 > 有一起加入同步更新这个仓库的小伙伴，请微信我
 
 
-![](https://user-gold-cdn.xitu.io/2019/12/26/16f41a3d3747ff31?imageView2/0/w/1280/h/960/ignore-error/1)
-
-![](https://github.com/LGCooci/LGiOSQuestions/blob/master/Cooci微信.jpeg)
-
-<img src="https://github.com/LGCooci/LGiOSQuestions/blob/master/Cooci微信.jpeg" width="167" height="200" alt="Cooci微信"/><br/>
+<img src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ef29392e5af8473590e571c18d4e0af9~tplv-k3u1fbpfcp-zoom-1.image" width="167" height="200" alt="Cooci微信"/><br/>
 
 #### 1：谈谈你对KVC的理解
 
