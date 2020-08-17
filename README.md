@@ -10,6 +10,11 @@
 > 
 > 有一起加入同步更新这个仓库的小伙伴，请微信我
 
+
+![](https://user-gold-cdn.xitu.io/2019/12/26/16f41a3d3747ff31?imageView2/0/w/1280/h/960/ignore-error/1)
+
+![](https://github.com/LGCooci/LGiOSQuestions/blob/master/Cooci微信.jpeg)
+
 <img src="https://github.com/LGCooci/LGiOSQuestions/blob/master/Cooci微信.jpeg" width="167" height="200" alt="Cooci微信"/><br/>
 
 #### 1：谈谈你对KVC的理解
@@ -137,7 +142,6 @@
 * `atomic`在`getter/setter`方法中加锁，仅保证了存取时的线程安全，假设我们的属性是`@property(atomic)NSMutableArray *array`;可变的容器时,无法保证对容器的修改是线程安全的.
 
 * 在编译器自动生产的`getter/setter`方法，最终会调用`objc_getProperty`和`objc_setProperty`方法存取属性，在此方法内部保证了读写时的线程安全的，当我们重写`getter/setter`方法时，就只能依靠自己在`getter/setter`中保证线程安全
-
 
 
 #### 5. Autoreleasepool所使用的数据结构是什么？AutoreleasePoolPage结构体了解么？
@@ -1821,7 +1825,7 @@ TCP断开连接需要经过**`四次挥手`：**
 
 **runloop 事件循环机制内部流程**
 
-![](https://upload-images.jianshu.io/upload_images/869753-ad24f9e5c0255800.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![](https://img-blog.csdnimg.cn/20191011113020740.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTM0ODAwNzA=,size_16,color_FFFFFF,t_70)
 
 **RunLoop主要涉及五个类：**
 
@@ -1996,7 +2000,7 @@ Block有三种形式，包括：
 
     * **只有局部变量 - 和定义的属性 才会拷贝到堆区**
     
-1). 不使用外部变量的block是全局block。
+1). 存储在程序的数据区域，在 block 内部没有引用任何外部变量。
 
 2). 使用外部变量并且未进行copy操作的block是栈block。
 
