@@ -131,7 +131,7 @@
 **A: atomic的实现机制**
 * `atomic`是`property`的修饰词之一，表示是原子性的，使用方式为`@property(atomic)int age`;此时编译器会自动生成 `getter/setter` 方法，最终会调用`objc_getProperty`和`objc_setProperty`方法来进行存取属性。
 
-* 若此时属性用`atomic`修饰的话，在这两个方法内部使用`os_unfair_lock` 来进行加锁，来保证读写的原子性。锁都在`PropertyLocks` 中保存着（在iOS平台会初始化8个，mac平台64个），在用之前，会把锁都初始化好，在需要用到时，用对象的地址加上成员变量的偏移量为`key`，去`PropertyLocks`中去取。因此存取时用的是同一个锁，所以atomic能保证属性的存取时是线程安全的。
+* 若此时属性用`atomic`修饰的话，在这两个方法内部使用`spinlock_t` 来进行加锁，来保证读写的原子性。锁都在`PropertyLocks` 中保存着（在iOS平台会初始化8个，mac平台64个），在用之前，会把锁都初始化好，在需要用到时，用对象的地址加上成员变量的偏移量为`key`，去`PropertyLocks`中去取。因此存取时用的是同一个锁，所以atomic能保证属性的存取时是线程安全的。
 
 * 注：由于锁是有限的，不用对象，不同属性的读取用的也可能是同一个锁
 
