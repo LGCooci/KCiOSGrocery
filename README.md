@@ -46,7 +46,7 @@
 
 > 可能有很多小伙伴还不太清楚，动静态库的开发，这里推荐一篇博客：[iOS-制作.a静态库SDK和使用.a静态库](https://blog.csdn.net/Feng512275/article/details/77864609)
 
-如果我们存在三方库冲突就会保存：`duplicate symbol _OBJC_IVAR_$_xxxx in:`
+如果我们存在三方库冲突就会报错：`duplicate symbol _OBJC_IVAR_$_xxxx in:`
 
 **目前见效最快的就是把`.framework`选中，`taggert Membership`的对勾取消掉，就编译没有问题了，但是后续的其他问题可能还会出现**
 
@@ -243,8 +243,12 @@ Dealloc 的实现机制是内容管理部分的重点，把这个知识点弄明
     * `has_cxx_dtor` 
     * `has_sidetable_rc`
 
-* 4-1.如果有以上五中任意一种，将会调用 `object_dispose()`方法，做下一步的处理。 
+* 4-1. 如果是`isTaggedPointer`，就直接返回了
+
+* 4-2. 如果有以上五中任意一种，将会调用 `object_dispose()`方法，做下一步的处理。 
+
 * 4-2.如果没有之前五种情况的任意一种，则可以执行释放操作，`C 函数的 free()`。 
+
 * 5.执行完毕。
 
 **2.object_dispose() 调用流程**。 
