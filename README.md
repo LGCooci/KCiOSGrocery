@@ -14,7 +14,13 @@
 >
 > [2: 2020-2021年最新面试题收集   (2021-04-27)](https://github.com/LGCooci/LGiOSQuestions/blob/master/2020-2021年最新面试题收集.md) 八套题你掌握直接起飞
 > 
-> [2: 2021年逻辑教育大师班第1次考试   (2021-04-27)](https://github.com/LGCooci/LGiOSQuestions/blob/master/2021年大师班第一阶段考试.md)
+> [3: 2021年逻辑教育大师班第1次考试   (2021-08-13)](https://github.com/LGCooci/LGiOSQuestions/blob/master/2021年大师班第一阶段考试.md)
+> 
+> [4: 2021年逻辑教育大师班第2次考试   (2021-09-07)](https://github.com/LGCooci/LGiOSQuestions/blob/master/2021年大师班第一阶段考试.md)
+
+这个专栏持续更新中,因为一个人更新整理,所以有很地方会有不对! 如果靓仔靓女的你发现了,请及时留言更新, 优化整个生态从你的一个小爱心 (❤️) 开始
+
+**我还是我,颜色不一样的烟火! 我是Cooci,期待与你更好的相遇**
 
 
 <img src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ef29392e5af8473590e571c18d4e0af9~tplv-k3u1fbpfcp-zoom-1.image" width="167" height="200" alt="Cooci微信"/><br/>
