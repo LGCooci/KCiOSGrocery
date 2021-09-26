@@ -1,13 +1,12 @@
 # KCiOSGrocery - iOS杂货铺
 
-这个仓库总结一些乱七八糟东西
-* iOS中高级面试题
-* 我VIP大师班分享出来的考试试卷
-* iOS_懒人开发tips
-* 如果大家可以通过点赞小心心,收藏方便下次查阅 **Star** 走一波.... Thanks♪(･ω･)ﾉ
-
-
 ![](https://github.com/LGCooci/LGiOSQuestions/blob/master/资源文件/KC_iOS杂货铺封面.png)
+
+这个仓库总结一些乱七八糟东西
+* `iOS中高级面试题`
+* `我VIP大师班分享出来的考试试卷`
+* `iOS_懒人开发tips`
+* 如果大家可以通过点赞小心心,收藏方便下次查阅 **Star** 走一波.... Thanks♪(･ω･)ﾉ
 
 **⚠️特别说明：部分来源网络摘抄，如有疑问，立即删除！⚠️**
 
@@ -27,4 +26,4 @@
 
 **我还是我,颜色不一样的烟火! 我是Cooci,期待与你更好的相遇**
 
-<img src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ef29392e5af8473590e571c18d4e0af9~tplv-k3u1fbpfcp-zoom-1.image" width="167" height="200" alt="Cooci微信"/><br/>
+[**☎️ : KC_Cooci 联系方式**](https://github.com/LGCooci/LGiOSQuestions/blob/master/资源文件/cooci_QRCode.png)
