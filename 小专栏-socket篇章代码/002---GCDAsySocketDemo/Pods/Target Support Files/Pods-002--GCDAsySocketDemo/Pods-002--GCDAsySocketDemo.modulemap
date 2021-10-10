@@ -1,0 +1,6 @@
+framework module Pods_002__GCDAsySocketDemo {
+  umbrella header "Pods-002--GCDAsySocketDemo-umbrella.h"
+
+  export *
+  module * { export * }
+}

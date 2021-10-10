@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="SVV-uy-6AC">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Navigation Controller-->
+        <scene sceneID="vGu-ii-QJB">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="SVV-uy-6AC" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="HE4-M8-kEC">
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="V1y-TF-gwT" kind="relationship" relationship="rootViewController" id="rxl-Qe-GFj"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Jj2-Q5-SyD" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-473" y="134"/>
+        </scene>
+        <!--画板功能-->
+        <scene sceneID="dL3-MQ-XQa">
+            <objects>
+                <viewController id="V1y-TF-gwT" customClass="ViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="73n-c5-Hg1">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="x11-i3-Z2r" customClass="KCView">
+                                <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="8AF-KB-zEa" firstAttribute="bottom" secondItem="x11-i3-Z2r" secondAttribute="bottom" id="9PA-hL-Kum"/>
+                            <constraint firstItem="8AF-KB-zEa" firstAttribute="trailing" secondItem="x11-i3-Z2r" secondAttribute="trailing" id="9ab-wH-py6"/>
+                            <constraint firstItem="x11-i3-Z2r" firstAttribute="leading" secondItem="8AF-KB-zEa" secondAttribute="leading" id="Rh4-cp-Gwa"/>
+                            <constraint firstItem="x11-i3-Z2r" firstAttribute="top" secondItem="8AF-KB-zEa" secondAttribute="top" id="X1e-pd-OZK"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="8AF-KB-zEa"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="画板功能" id="fNV-zG-XnR">
+                        <barButtonItem key="leftBarButtonItem" title="断开Socket" id="xRJ-dK-BJf">
+                            <connections>
+                                <action selector="didClickDisconnectAction:" destination="V1y-TF-gwT" id="R5e-cY-u5W"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" title="连接Socket" id="ML2-SV-kNQ">
+                            <connections>
+                                <action selector="didClickCreatSocketAction:" destination="V1y-TF-gwT" id="HIY-FD-W9h"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="drawView" destination="x11-i3-Z2r" id="cdE-hr-7fB"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Bo4-uv-wcE" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="327" y="134"/>
+        </scene>
+    </scenes>
+</document>
